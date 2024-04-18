@@ -2,31 +2,41 @@ package render
 
 import (
 	"bytes"
-	"github.com/harvester/addons/pkg/data"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"text/template"
 )
 
-func Addon(path string) error {
-	for _, v := range data.AssetNames() {
-		content, err := data.Asset(v)
-		if err != nil {
-			return err
-		}
-		_, fileName := filepath.Split(v)
+const (
+	relativeTemplatePath = "../templates"
+)
 
-		renderedContent, err := renderTemplate(content)
+func Addon(templateSource, destPath string) error {
+	return filepath.Walk(templateSource, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
+			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
 			return err
 		}
-		log.Printf("writing rendered addon file %s", fileName)
-		if err := os.WriteFile(filepath.Join(path, fileName), renderedContent, 0755); err != nil {
-			return err
+
+		if !info.IsDir() {
+			templateContent, err := os.ReadFile(path)
+			if err != nil {
+				return fmt.Errorf("error reading file %s: %v", info.Name(), err)
+			}
+			generatedContent, err := renderTemplate(templateContent)
+			if err != nil {
+				return fmt.Errorf("error rendering template %s: %v", info.Name(), err)
+			}
+			err = os.WriteFile(filepath.Join(destPath, info.Name()), generatedContent, 0755)
+			if err != nil {
+				return fmt.Errorf("error writing addon %s: %v", info.Name(), err)
+			}
+			log.Printf("generated addon file %s", info.Name())
 		}
-	}
-	return nil
+		return nil
+	})
 }
 
 func renderTemplate(content []byte) ([]byte, error) {

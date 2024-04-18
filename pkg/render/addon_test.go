@@ -12,6 +12,6 @@ func Test_Addon(t *testing.T) {
 	tmpPath, err := os.MkdirTemp(tmpDir, "rendered")
 	assert.NoError(err)
 	defer os.RemoveAll(tmpPath)
-	err = Addon(tmpPath)
+	err = Addon(relativeTemplatePath, tmpPath)
 	assert.NoError(err)
 }

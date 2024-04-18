@@ -1,5 +1,3 @@
-//go:generate go run ./pkg/bindata
-
 package main
 
 import (
@@ -10,8 +8,12 @@ import (
 	"os"
 )
 
+const (
+	templateSource = "./pkg/templates"
+)
+
 func main() {
-	var generateTemplates, generateAddons bool
+	var generateAddons bool
 	var path string
 	app := &cli.App{
 		Flags: []cli.Flag{
@@ -21,34 +23,22 @@ func main() {
 				Usage:       "generate disabled addon yaml manifests",
 				Destination: &generateAddons,
 			},
-			&cli.BoolFlag{
-				Name:        "generateTemplates",
-				Value:       false,
-				Usage:       "generate addon template files",
-				Destination: &generateTemplates,
-			},
 			&cli.StringFlag{
 				Name:        "path",
 				Value:       ".",
-				Usage:       "destiation for output files",
+				Usage:       "destination for output files",
 				Destination: &path,
 			},
 		},
 
 		Action: func(ctx *cli.Context) error {
-			if !generateTemplates && !generateAddons {
-				return fmt.Errorf("either generateTemplates or generateAddons need to be specified")
+			if !generateAddons {
+				return fmt.Errorf("generateAddons need to be specified")
 			}
 
 			if generateAddons {
-				if err := render.Addon(path); err != nil {
+				if err := render.Addon(templateSource, path); err != nil {
 					return fmt.Errorf("error during rendering addons: %v", err)
-				}
-			}
-
-			if generateTemplates {
-				if err := render.Template(path); err != nil {
-					return fmt.Errorf("error during rendering templates: %v", err)
 				}
 			}
 
