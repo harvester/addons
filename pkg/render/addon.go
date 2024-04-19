@@ -3,40 +3,68 @@ package render
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"text/template"
+
+	"github.com/sirupsen/logrus"
+	"sigs.k8s.io/yaml"
 )
 
 const (
 	relativeTemplatePath = "../templates"
+	defaultFileName      = "rancherd-22-addons.yaml"
 )
 
+type AddonResources struct {
+	Resources []map[string]interface{} `json:"resources,omitempty"`
+}
+
 func Addon(templateSource, destPath string) error {
-	return filepath.Walk(templateSource, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
-			return err
+	contents, err := os.ReadFile(filepath.Join(templateSource, defaultFileName))
+	if err != nil {
+		return fmt.Errorf("error reading template file %s: %v", defaultFileName, err)
+	}
+
+	renderedContent, err := renderTemplate(contents)
+	if err != nil {
+		return fmt.Errorf("error rendering template: %v", err)
+	}
+
+	//split rendered template into individual files
+	resources := &AddonResources{}
+	err = yaml.Unmarshal(renderedContent, resources)
+	if err != nil {
+		return fmt.Errorf("error unmarshalling resources: %v", err)
+	}
+
+	for _, v := range resources.Resources {
+		metadata, ok := v["metadata"]
+		if !ok {
+			logrus.Errorf("skipping resource since metadata is missing: %v", v)
+			continue
+		}
+		metadataMap, ok := metadata.(map[string]interface{})
+		if !ok {
+			logrus.Errorf("skipping resource as unable to assert metadata to map[string]interface{}: %v", v)
 		}
 
-		if !info.IsDir() {
-			templateContent, err := os.ReadFile(path)
-			if err != nil {
-				return fmt.Errorf("error reading file %s: %v", info.Name(), err)
-			}
-			generatedContent, err := renderTemplate(templateContent)
-			if err != nil {
-				return fmt.Errorf("error rendering template %s: %v", info.Name(), err)
-			}
-			err = os.WriteFile(filepath.Join(destPath, info.Name()), generatedContent, 0755)
-			if err != nil {
-				return fmt.Errorf("error writing addon %s: %v", info.Name(), err)
-			}
-			log.Printf("generated addon file %s", info.Name())
+		name, ok := metadataMap["name"]
+		if !ok {
+			logrus.Errorf("skipping resource since name is missing in metadata: %v", v)
+			continue
 		}
-		return nil
-	})
+		addonContents, err := yaml.Marshal(v)
+		if err != nil {
+			return fmt.Errorf("error marshalling map to addon contents for addon %s: %v", name, err)
+		}
+		fileName := fmt.Sprintf("%s.yaml", name)
+		err = os.WriteFile(filepath.Join(destPath, fileName), addonContents, 0755)
+		if err != nil {
+			return fmt.Errorf("error writing addon file %s: %v", fileName, err)
+		}
+	}
+	return nil
 }
 
 func renderTemplate(content []byte) ([]byte, error) {

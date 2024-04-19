@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/harvester/addons/pkg/render"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"log"
 	"os"
 )
 
@@ -47,7 +47,7 @@ func main() {
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 
 }
