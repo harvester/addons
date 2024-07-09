@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/harvester/addons/pkg/render"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"os"
 )
 
 const (
@@ -13,7 +14,7 @@ const (
 )
 
 func main() {
-	var generateAddons bool
+	var generateAddons, generateTemplates bool
 	var path string
 	app := &cli.App{
 		Flags: []cli.Flag{
@@ -22,6 +23,12 @@ func main() {
 				Value:       false,
 				Usage:       "generate disabled addon yaml manifests",
 				Destination: &generateAddons,
+			},
+			&cli.BoolFlag{
+				Name:        "generateTemplates",
+				Value:       false,
+				Usage:       "generate template manifests",
+				Destination: &generateTemplates,
 			},
 			&cli.StringFlag{
 				Name:        "path",
@@ -32,16 +39,21 @@ func main() {
 		},
 
 		Action: func(ctx *cli.Context) error {
-			if !generateAddons {
-				return fmt.Errorf("generateAddons need to be specified")
+			if !generateAddons && !generateTemplates {
+				return fmt.Errorf("generateAddons or generateTemplates need to be specified")
 			}
 
 			if generateAddons {
-				if err := render.Addon(templateSource, path); err != nil {
+				if err := render.Addon(templateSource, path, "version_info"); err != nil {
 					return fmt.Errorf("error during rendering addons: %v", err)
 				}
 			}
 
+			if generateTemplates {
+				if err := render.Template(templateSource, path, "version_info"); err != nil {
+					return fmt.Errorf("error during rendering template: %v", err)
+				}
+			}
 			return nil
 		},
 	}

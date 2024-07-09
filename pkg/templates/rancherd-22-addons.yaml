@@ -6,7 +6,7 @@ resources:
       namespace: harvester-system
     spec:
       repo: http://harvester-cluster-repo.cattle-system.svc/charts
-      version: "0.3.0"
+      version: << .VM_IMPORT_CONTROLLER_CHART_VERSION >>
       chart: harvester-vm-import-controller
       {{- if and .Addons .Addons.harvester_vm_import_controller }}
       enabled: {{ .Addons.harvester_vm_import_controller.Enabled }}
@@ -15,7 +15,7 @@ resources:
       {{- end }}
       valuesContent: |
         image:
-          tag: v0.3.0
+          tag: << .VM_IMPORT_CONTROLLER_IMAGE >>
         fullnameOverride: harvester-vm-import-controller
   - apiVersion: harvesterhci.io/v1beta1
     kind: Addon
@@ -24,7 +24,7 @@ resources:
       namespace: harvester-system
     spec:
       repo: http://harvester-cluster-repo.cattle-system.svc/charts
-      version: "0.3.2"
+      version: << .PCIDEVICES_CONTROLLER_CHART_VERSION >>
       chart: harvester-pcidevices-controller
       {{- if and .Addons .Addons.harvester_pcidevices_controller }}
       enabled: {{ .Addons.harvester_pcidevices_controller.Enabled }}
@@ -33,7 +33,7 @@ resources:
       {{- end }}
       valuesContent: |
         image:
-          tag: v0.3.2
+          tag: << .PCIDEVICES_CONTROLLER_IMAGE >>
         fullnameOverride: harvester-pcidevices-controller
   - apiVersion: harvesterhci.io/v1beta1
     kind: Addon
@@ -203,7 +203,7 @@ resources:
       addon.harvesterhci.io/experimental: "true"
     spec:
       repo: http://harvester-cluster-repo.cattle-system.svc/charts
-      version: "0.3.0"
+      version: << .HARVESTER_SEEDER_CHART_VERSION >>
       chart: harvester-seeder
       {{- if and .Addons .Addons.harvester_seeder}}
       enabled: {{ .Addons.harvester_seeder.Enabled }}
@@ -212,7 +212,7 @@ resources:
       {{- end }}
       valuesContent: |
         image:
-          tag: v0.3.0
+          tag: << .HARVESTER_SEEDER_IMAGE >>
         fullnameOverride: harvester-seeder
   - apiVersion: harvesterhci.io/v1beta1
     kind: Addon
@@ -221,7 +221,7 @@ resources:
       namespace: harvester-system
     spec:
       repo: http://harvester-cluster-repo.cattle-system.svc/charts
-      version: "0.1.1"
+      version: << .NVIDIA_DRIVER_RUNTIME_CHART_VERSION >>
       chart: nvidia-driver-runtime
       {{- if and .Addons .Addons.nvidia_driver_toolkit}}
       enabled: {{ .Addons.nvidia_driver_toolkit.Enabled }}
