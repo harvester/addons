@@ -2,7 +2,8 @@
 
 Repo contains addon info under `/pkg/templates` 
 
-The templates can directly be used by harvester-installer
+The templates need to be generated for harvester-installer packaging as follows:
+`go run . -generateTemplates -path $path_to_installer_templates`
 
 For harvester upgrade path, the templates need to be rendered, and easiest way to do the same is to call
 
