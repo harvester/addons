@@ -155,6 +155,12 @@ func Template(templateSource, destPath, versionFilePath string) error {
 		return fmt.Errorf("error rendering template: %v", err)
 	}
 
+	// check if any template is not effectively rendered
+	if strings.Contains(string(renderedContent), "<no value>") {
+		fmt.Println(string(renderedContent))
+		return fmt.Errorf("check the output, some templates are not effectively rendered, search keyword: <no value>")
+	}
+
 	err = os.WriteFile(filepath.Join(destPath, defaultFileName), renderedContent, 0644)
 	if err != nil {
 		return fmt.Errorf("error writing addon file %s: %v", defaultFileName, err)
