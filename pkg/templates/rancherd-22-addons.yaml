@@ -199,8 +199,8 @@ resources:
     metadata:
       name: harvester-seeder
       namespace: harvester-system
-    labels:
-      addon.harvesterhci.io/experimental: "true"
+      labels:
+        addon.harvesterhci.io/experimental: "true"
     spec:
       repo: http://harvester-cluster-repo.cattle-system.svc/charts
       version: << .HARVESTER_SEEDER_CHART_VERSION >>
