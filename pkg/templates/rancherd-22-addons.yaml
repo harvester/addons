@@ -239,6 +239,8 @@ resources:
     metadata:
       name: kubeovn-operator
       namespace: kube-system
+      labels:
+        addon.harvesterhci.io/experimental: "true"
     spec:
       repo: http://harvester-cluster-repo.cattle-system.svc/charts
       version: << .KUBEOVN_OPERATOR_CHART_VERSION >>
