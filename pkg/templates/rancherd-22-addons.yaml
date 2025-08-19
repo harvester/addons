@@ -115,6 +115,8 @@ resources:
       enabled: false
       {{- end }}
       valuesContent: |
+        rancherMonitoring:
+          enabled: false
         alertmanager:
           enabled: true
           config:
