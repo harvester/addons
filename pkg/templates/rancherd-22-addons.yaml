@@ -230,7 +230,7 @@ resources:
       {{- end }}
       valuesContent: |
         image:
-          tag: v1.6-20250813
+          tag: v1.6-20250826
           repo: rancher/harvester-nvidia-driver-toolkit
         driverLocation:  "HTTPENDPOINT/NVIDIA-Linux-x86_64-vgpu-kvm.run" 
         fullnameOverride: nvidia-driver-runtime
