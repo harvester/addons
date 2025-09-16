@@ -234,7 +234,7 @@ resources:
         image:
           tag: sle-micro-head
           repo: rancher/harvester-nvidia-driver-toolkit
-        driverLocation:  "HTTPENDPOINT/NVIDIA-Linux-x86_64-vgpu-kvm.run" 
+        driverLocation:  "HTTPENDPOINT/NVIDIA-Linux-x86_64-vgpu-kvm.run"
         fullnameOverride: nvidia-driver-runtime
   - apiVersion: harvesterhci.io/v1beta1
     kind: Addon
@@ -349,3 +349,61 @@ resources:
             gcInterval: 360
             inspectInterval: 20
             ovsVSCtlConcurrency: 100
+  - apiVersion: harvesterhci.io/v1beta1
+    kind: Addon
+    metadata:
+      name: descheduler
+      namespace: kube-system
+      labels:
+        addon.harvesterhci.io/experimental: "true"
+    spec:
+      repo: http://harvester-cluster-repo.cattle-system.svc/charts
+      version: << .DESCHEDULER_CHART_VERSION >>
+      chart: descheduler
+      {{- if and .Addons .Addons.descheduler }}
+      enabled: {{ .Addons.descheduler.Enabled }}
+      {{- else }}
+      enabled: false
+      {{- end }}
+      valuesContent: |
+        kind: Deployment
+        image:
+          repository: registry.k8s.io/descheduler/descheduler
+          pullPolicy: IfNotPresent
+        deschedulingInterval: 5m
+        replicas: 1
+        deschedulerPolicy:
+          profiles:
+          - name: default
+            pluginConfig:
+            - name: DefaultEvictor
+              args:
+                ignorePvcPods: false
+                evictLocalStoragePods: true
+            - name: LowNodeUtilization
+              args:
+                evictableNamespaces:
+                  exclude:
+                  - cattle-dashboards
+                  - cattle-fleet-clusters-system
+                  - cattle-fleet-local-system
+                  - cattle-fleet-system
+                  - cattle-logging-system
+                  - cattle-monitoring-system
+                  - cattle-provisioning-capi-system
+                  - cattle-system
+                  - fleet-local
+                  - harvester-system
+                  - kube-system
+                  - local
+                  - longhorn-system
+                thresholds:
+                  cpu: 30
+                  memory: 30
+                targetThresholds:
+                  cpu: 50
+                  memory: 50
+            plugins:
+              balance:
+                enabled:
+                - LowNodeUtilization
