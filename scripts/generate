@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+date
+echo "Test generate on addon path, DAPPER_SOURCE=${DAPPER_SOURCE}"
+
+if [[ -z ${DAPPER_SOURCE} ]]; then
+  echo "set the DAPPER_SOURCE env first"
+  exit
+fi
+
+cd ${DAPPER_SOURCE}
+go run . -generateTemplates
+echo "The rendered addon template file ./rancherd-22-addons.yaml"
+grep "version:" rancherd-22-addons.yaml -1 || echo "Did not find any chart info from the addon file"
+cd -
