@@ -1,5 +1,5 @@
 {{- if .Values.additionalLoggingSources.rke2.enabled }}
-# patch to ./templates/loggings/rke2/daemonset.yaml
+# harvester-patch to ./templates/loggings/rke2/daemonset.yaml
 # when harvester-installer makes ISO, the original file is replaced
 apiVersion: apps/v1
 kind: DaemonSet
@@ -42,11 +42,17 @@ spec:
             - mountPath: "/var/log/audit/audit.log" # harvester-patch
               name: rke2-audit
               readOnly: true
+      {{- with .Values.dnsConfig }}
+      dnsConfig:  {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.tolerations }}
       tolerations: {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . }}
       {{- end }}
       serviceAccountName: "{{ .Release.Name }}-rke2-journald-aggregator"
       volumes:
@@ -71,54 +77,4 @@ kind: ServiceAccount
 metadata:
   name: "{{ .Release.Name }}-rke2-journald-aggregator"
   namespace: "{{ .Release.Namespace }}"
-{{- if .Values.global.cattle.psp.enabled }}
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: "{{ .Release.Name }}-rke2-journald-aggregator"
-rules:
-  - apiGroups:
-    - policy
-    resourceNames:
-    - "{{ .Release.Name }}-rke2-journald-aggregator"
-    resources:
-    - podsecuritypolicies
-    verbs:
-    - use
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: "{{ .Release.Name }}-rke2-journald-aggregator"
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: "{{ .Release.Name }}-rke2-journald-aggregator"
-subjects:
-  - kind: ServiceAccount
-    name: "{{ .Release.Name }}-rke2-journald-aggregator"
----
-apiVersion: policy/v1beta1
-kind: PodSecurityPolicy
-metadata:
-  name: "{{ .Release.Name }}-rke2-journald-aggregator"
-  namespace: "{{ .Release.Namespace }}"
-spec:
-  allowPrivilegeEscalation: false
-  fsGroup:
-    rule: RunAsAny
-  readOnlyRootFilesystem: true
-  runAsUser:
-    rule: RunAsAny
-  seLinux:
-    rule: RunAsAny
-  supplementalGroups:
-    rule: RunAsAny
-  volumes:
-  - configMap
-  - emptyDir
-  - secret
-  - hostPath
-{{- end }}
 {{- end }}
