@@ -12,3 +12,11 @@ For harvester upgrade path, the templates need to be rendered, and easiest way t
 The repo also contains a `version_info` file which is sourced by `harvester-installer` build-bundle script
 
 Please ensure image and chart info update is also reflected in this file.
+
+## run `make` with dapper
+
+All following commands run in similar way like most Harvester repos.
+
+Run `make generate` to generate the addon templates, which is saved under `./bin`.
+
+Run `make test-chart-patch` to test the patches upon `rancher-monitoring` and `rancher-logging` charts, the patched charts are saved under `./bin/patched-charts`.

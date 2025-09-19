@@ -1,0 +1,10 @@
+--- values.yaml
++++ values-new.yaml
+@@ -446,7 +446,7 @@
+   ##
+   image:
+     repository: rancher/mirrored-library-busybox
+-    tag: "1.31.1"
++    tag: "1.37.0"
+     sha: ""
+     pullPolicy: IfNotPresent
