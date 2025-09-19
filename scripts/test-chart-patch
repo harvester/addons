@@ -31,7 +31,7 @@ if [[ -z ${MONITORING_VERSION} || -z {LOGGING_VERSION} ]]; then
   exit 1
 fi
 
-CHARTS_DIR="/tmp/patch-charts"
+CHARTS_DIR="${DAPPER_SOURCE}/bin/patched-charts"
 mkdir -p ${CHARTS_DIR}
 
 # Prepare monitoring chart

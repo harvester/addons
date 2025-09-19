@@ -56,4 +56,3 @@ patch_rancher_monitoring_chart()
   echo "finish patch ranch-monitoring chart"
   cd $cwd
 }
-

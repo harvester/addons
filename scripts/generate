@@ -9,8 +9,10 @@ if [[ -z ${DAPPER_SOURCE} ]]; then
   exit
 fi
 
+defaultOutpath=${DAPPER_SOURCE}/bin
+
 cd ${DAPPER_SOURCE}
-go run . -generateTemplates
-echo "The rendered addon template file ./rancherd-22-addons.yaml"
-grep "version:" rancherd-22-addons.yaml -1 || echo "Did not find any chart info from the addon file"
+go run . -generateTemplates -path ${defaultOutpath}
+echo "The rendered addon template file ${defaultOutpath}/rancherd-22-addons.yaml"
+grep "version:" ${defaultOutpath}/rancherd-22-addons.yaml -1 || echo "Did not find any chart info from the addon file"
 cd -
