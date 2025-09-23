@@ -1,0 +1,24 @@
+FROM registry.suse.com/bci/golang:1.25.0
+
+ARG DAPPER_HOST_ARCH
+ENV ARCH=${DAPPER_HOST_ARCH}
+
+RUN zypper -n rm container-suseconnect && \
+    zypper -n install curl tar patch
+
+# set up helm
+ENV HELM_VERSION=v3.5.4
+ENV HELM_URL=https://get.helm.sh/helm-${HELM_VERSION}-linux-${ARCH}.tar.gz
+RUN mkdir /usr/tmp && \
+    curl ${HELM_URL} | tar xvzf - --strip-components=1 -C /usr/tmp/ && \
+    mv /usr/tmp/helm /usr/bin/helm
+
+ENV DAPPER_ENV REPO TAG
+ENV DAPPER_SOURCE /go/src/github.com/harvester/addons
+ENV DAPPER_OUTPUT ./bin
+ENV DAPPER_DOCKER_SOCKET true
+ENV HOME ${DAPPER_SOURCE}
+WORKDIR ${DAPPER_SOURCE}
+
+ENTRYPOINT ["./scripts/entry"]
+CMD ["default"]
