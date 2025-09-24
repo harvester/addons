@@ -117,6 +117,9 @@ resources:
       valuesContent: |
         rancherMonitoring:
           enabled: false
+        kube-state-metrics:
+          metricLabelsAllowlist:
+            - 'nodes=[*]'
         alertmanager:
           enabled: true
           config:
