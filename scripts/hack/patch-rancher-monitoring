@@ -30,7 +30,7 @@ patch_rancher_monitoring_chart()
 
   # replace grafana values busybox image version; yq can also work, but it strips all blank lines; use patch instead
   local valuesfile="./rancher-monitoring/charts/grafana/values.yaml"
-  local difffile="${pkg_monitoring_crd_path}/${monitoring_version}/patch-grafana-values.diff"
+  local difffile="${pkg_monitoring_path}/${monitoring_version}/patch-grafana-values.diff"
   echo "patch mirrored-library-busybox image version"
   echo "the current values.yaml has following mirrored-library-busybox image version"
   grep "mirrored-library-busybox" $valuesfile -2 || true
