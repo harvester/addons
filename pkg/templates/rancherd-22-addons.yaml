@@ -375,6 +375,9 @@ resources:
           pullPolicy: IfNotPresent
         deschedulingInterval: 5m
         replicas: 1
+        cmdOptions:
+          v: 3
+          feature-gates: EvictionsInBackground=true
         deschedulerPolicy:
           profiles:
           - name: default
