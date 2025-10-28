@@ -26,7 +26,6 @@ data:
         Systemd_Filter    _SYSTEMD_UNIT=rke2-agent.service
         Systemd_Filter    _SYSTEMD_UNIT=rancherd.service
         Systemd_Filter    _SYSTEMD_UNIT=rancher-system-agent.service
-        Systemd_Filter    _SYSTEMD_UNIT=wicked.service
         Systemd_Filter    _SYSTEMD_UNIT=iscsid.service
         Systemd_Filter    _TRANSPORT=kernel
         {{- if .Values.additionalLoggingSources.rke2.stripUnderscores }}
