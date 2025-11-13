@@ -379,11 +379,14 @@ resources:
           v: 3
           feature-gates: EvictionsInBackground=true
         deschedulerPolicy:
+          maxNoOfPodsToEvictPerNode: 5
           profiles:
           - name: default
             pluginConfig:
             - name: DefaultEvictor
               args:
+                nodeFit: true
+                minReplicas: 2
                 ignorePvcPods: false
                 evictLocalStoragePods: true
             - name: LowNodeUtilization
