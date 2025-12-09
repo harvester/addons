@@ -386,7 +386,6 @@ resources:
             - name: DefaultEvictor
               args:
                 nodeFit: true
-                minReplicas: 2
                 ignorePvcPods: false
                 evictLocalStoragePods: true
             - name: LowNodeUtilization
