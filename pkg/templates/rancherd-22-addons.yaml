@@ -389,6 +389,12 @@ resources:
                 nodeFit: true
                 ignorePvcPods: false
                 evictLocalStoragePods: true
+                labelSelector:
+                  matchExpressions:
+                    - key: "kubevirt.io"
+                      operator: "In"
+                      values:
+                        - "virt-launcher"
             - name: LowNodeUtilization
               args:
                 evictableNamespaces:
