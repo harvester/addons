@@ -358,6 +358,7 @@ resources:
       name: descheduler
       namespace: kube-system
       labels:
+        addon.harvesterhci.io/displayName: "Virtual Machine Auto Balance"
         addon.harvesterhci.io/experimental: "true"
     spec:
       repo: http://harvester-cluster-repo.cattle-system.svc/charts
