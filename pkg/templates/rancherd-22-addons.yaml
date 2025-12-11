@@ -358,6 +358,7 @@ resources:
       name: descheduler
       namespace: kube-system
       labels:
+        addon.harvesterhci.io/displayName: "virtual-machine-auto-balance"
         addon.harvesterhci.io/experimental: "true"
     spec:
       repo: http://harvester-cluster-repo.cattle-system.svc/charts
@@ -386,9 +387,14 @@ resources:
             - name: DefaultEvictor
               args:
                 nodeFit: true
-                minReplicas: 2
                 ignorePvcPods: false
                 evictLocalStoragePods: true
+                labelSelector:
+                  matchExpressions:
+                    - key: "kubevirt.io"
+                      operator: "In"
+                      values:
+                        - "virt-launcher"
             - name: LowNodeUtilization
               args:
                 evictableNamespaces:
