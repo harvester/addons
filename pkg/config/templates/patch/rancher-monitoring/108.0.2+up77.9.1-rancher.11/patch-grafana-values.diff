@@ -1,6 +1,6 @@
 --- values.yaml
 +++ values-new.yaml
-@@ -446,7 +446,7 @@
+@@ -449,7 +449,7 @@
    ##
    image:
      repository: rancher/mirrored-library-busybox

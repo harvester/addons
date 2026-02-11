@@ -1,11 +1,12 @@
 {{- if .Values.additionalLoggingSources.rke2.enabled }}
+{{- $individualValues := .Values.additionalLoggingSources.rke2.fluentbit -}}
 # harvester-patch to ./templates/loggings/rke2/daemonset.yaml
 # when harvester-installer makes ISO, the original file is replaced
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: "{{ .Release.Name }}-rke2-journald-aggregator"
-  namespace: "{{ .Release.Namespace }}"
+  namespace: {{ include "logging-operator.namespace" . }}
 spec:
   selector:
     matchLabels:
@@ -15,15 +16,21 @@ spec:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/loggings/rke2/configmap.yaml") . | sha256sum }}
       name: "{{ .Release.Name }}-rke2-journald-aggregator"
-      namespace: "{{ .Release.Namespace }}"
+      namespace: {{ include "logging-operator.namespace" . }}
       labels:
         name: {{ .Release.Name }}-rke2-journald-aggregator
     spec:
       containers:
         - name: fluentbit
           image: "{{ template "logging-operator.fluentbitImage" . }}"
-          {{- if .Values.global.seLinux.enabled }}
+          {{- include "logging-operator.individualFluentbit" $individualValues | nindent 10 }}
           securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          {{- if .Values.global.seLinux.enabled }}
             seLinuxOptions:
               type: rke_logreader_t
           {{- end }}
@@ -76,5 +83,5 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: "{{ .Release.Name }}-rke2-journald-aggregator"
-  namespace: "{{ .Release.Namespace }}"
+  namespace: {{ include "logging-operator.namespace" . }}
 {{- end }}

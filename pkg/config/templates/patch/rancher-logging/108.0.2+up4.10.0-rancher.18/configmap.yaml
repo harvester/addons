@@ -6,6 +6,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-rke2
+  namespace: {{ include "logging-operator.namespace" . }}
   labels:
 {{ include "logging-operator.labels" . | indent 4 }}
 data:
@@ -74,7 +75,7 @@ data:
     [OUTPUT]
         Name              forward
         Match             *
-        Host              {{ .Release.Name }}-root-fluentd.{{ .Release.Namespace }}.svc
+        Host              {{ .Release.Name }}-root-fluentd.{{ include "logging-operator.namespace" . }}.svc
         Port              24240
         Retry_Limit       False
   parsers.conf: |
