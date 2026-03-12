@@ -235,7 +235,7 @@ resources:
       {{- end }}
       valuesContent: |
         image:
-          tag: sle-micro-head
+          tag: v1.8-20260312
           repo: rancher/harvester-nvidia-driver-toolkit
         driverLocation:  "HTTPENDPOINT/NVIDIA-Linux-x86_64-vgpu-kvm.run"
         fullnameOverride: nvidia-driver-runtime
