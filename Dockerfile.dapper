@@ -3,15 +3,23 @@ FROM registry.suse.com/bci/golang:1.25.0
 ARG DAPPER_HOST_ARCH
 ENV ARCH=${DAPPER_HOST_ARCH}
 
+ARG HELM_VERSION=v3.20.0
+ARG HELM_SHA256_Linux_amd64=dbb4c8fc8e19d159d1a63dda8db655f9ffa4aac1b9a6b188b34a40957119b286
+ARG HELM_SHA256_Linux_arm64=bfb14953295d5324d47ab55f3dfba6da28d46c848978c8fbf412d4271bdc29f1
+
 RUN zypper -n rm container-suseconnect && \
     zypper -n install curl tar patch
 
 # set up helm
-ENV HELM_VERSION=v3.5.4
-ENV HELM_URL=https://get.helm.sh/helm-${HELM_VERSION}-linux-${ARCH}.tar.gz
+ENV HELM_VERSION=${HELM_VERSION}
+ENV HELM_TARBALL=helm-${HELM_VERSION}-linux-${ARCH}.tar.gz
+ENV HELM_URL=https://get.helm.sh/${HELM_TARBALL}
 RUN mkdir /usr/tmp && \
-    curl ${HELM_URL} | tar xvzf - --strip-components=1 -C /usr/tmp/ && \
-    mv /usr/tmp/helm /usr/bin/helm
+  curl -sSLO --output-dir /usr/tmp ${HELM_URL}  && \
+  HELM_SHA256=HELM_SHA256_Linux_${ARCH} && \
+  echo "${!HELM_SHA256}  /usr/tmp/${HELM_TARBALL}" | sha256sum -c - && \
+  tar xvzf /usr/tmp/${HELM_TARBALL} --strip-components=1 -C /usr/tmp/ && \
+  mv /usr/tmp/helm /usr/bin/helm
 
 ENV DAPPER_ENV REPO TAG
 ENV DAPPER_SOURCE /go/src/github.com/harvester/addons
