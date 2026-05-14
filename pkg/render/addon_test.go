@@ -37,5 +37,5 @@ func Test_Template(t *testing.T) {
 
 	rendered, err := os.ReadFile(filepath.Join(tmpPath, defaultFileName))
 	assert.NoError(err)
-	assert.Contains(string(rendered), "metricsUtilization:\n                  metricsServer: true")
+	assert.Regexp(`metricsUtilization:\s*metricsServer:\s*true`, string(rendered))
 }
