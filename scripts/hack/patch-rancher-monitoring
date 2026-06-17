@@ -1,10 +1,18 @@
 #!/bin/bash
 
+pull_rancher_monitoring_chart()
+{
+  local helm_repo_base_url="$1"
+  local chart="$2"
+  local version="${RANCHER_MONITORING_CHART_VERSION}"
+  helm pull "${helm_repo_base_url}/${chart}/${chart}-${version}.tgz" -d "${CHARTS_DIR}"
+}
+
 patch_rancher_monitoring_chart()
 {
   local chart_dir=$1 #${CHARTS_DIR}
-  local monitoring_version=$2 #MONITORING_VERSION
-  local pkg_monitoring_path=$3 #${PKG_PATCH_MONITORING_PATH}
+  local monitoring_version="${RANCHER_MONITORING_CHART_VERSION}"
+  local pkg_monitoring_path=$2 #${PKG_PATCH_MONITORING_PATH}
   local cwd=$(pwd)
 
   if [ ! -d "${pkg_monitoring_path}/${monitoring_version}" ]; then
@@ -55,4 +63,13 @@ patch_rancher_monitoring_chart()
   rm -rf rancher-monitoring
   echo "finish patch ranch-monitoring chart"
   cd $cwd
+}
+
+test_rancher_monitoring_chart()
+{
+  local chart="$1"
+  local version="${RANCHER_MONITORING_CHART_VERSION}"
+  tar xzvf "${CHARTS_DIR}/${chart}-${version}.tgz" > /dev/null --warning=no-timestamp \
+    && echo -e "\033[1m\033[32m${chart} PASS\033[0m" \
+    || echo -e "\033[1m\033[31m${chart} FAIL\033[0m"
 }

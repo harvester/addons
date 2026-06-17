@@ -1,0 +1,39 @@
+#!/bin/bash
+set -e
+
+# the `rancher-monitoring` and `rancher-logging` chart have some patches
+# this  script ensure the patches can be effectively applied to target chart
+# some codes are copied from https://github.com/harvester/harvester-installer/blob/1c239ed406ed0c1ec1eef37118fc54680c896bc7/scripts/build-bundle#L12
+
+helm_repo_base_url="https://charts.rancher.io/assets"
+root="$(realpath "$(dirname "$(realpath "$0")")/../")"
+
+source "${root}/version_info"
+
+CHARTS_DIR="${root}/output/patched-charts"
+mkdir -p "${CHARTS_DIR}"
+
+# patch charts
+for patch_script in scripts/hack/* ; do
+  chart="${patch_script//scripts\/hack\/patch-/}"
+  chart_var="${chart//-/"_"}"
+  pull_func="pull_${chart_var}_chart"
+  patch_func="patch_${chart_var}_chart"
+  test_func="test_${chart_var}_chart"
+
+  PKG_PATCH_PATH="${root}/pkg/config/templates/patch/${chart}"
+  if [ -d "$PKG_PATCH_PATH" ] && [ -f "${root}/scripts/hack/patch-${chart}" ] ; then
+    echo -e "\033[1m\033[36mpatching chart ${chart}\033[0m"
+    source "${root}/scripts/hack/patch-${chart}"
+    TMP="$(mktemp -d)"
+    pushd "$TMP"
+    "$pull_func" "$helm_repo_base_url" "$chart"
+    "$patch_func" "${CHARTS_DIR}" "${PKG_PATCH_PATH}"
+    "$test_func" "$chart"
+    popd
+    rm -rf "$TMP"
+  fi
+done
+
+ls "${CHARTS_DIR}" -alt
+echo -e "\033[1m\033[32mpatch charts PASS\033[0m"

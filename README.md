@@ -13,10 +13,16 @@ The repo also contains a `version_info` file which is sourced by `harvester-inst
 
 Please ensure image and chart info update is also reflected in this file.
 
-## run `make` with dapper
+## Run with `make` and `docker`
 
 All following commands run in similar way like most Harvester repos.
 
-Run `make generate` to generate the addon templates, which is saved under `./bin`.
+Run `make generate` to generate the addon templates, which is saved under `./output`.
 
-Run `make test-chart-patch` to test the patches upon `rancher-monitoring` and `rancher-logging` charts, the patched charts are saved under `./bin/patched-charts`.
+Run `make patch-charts` or scripts/patch-charts to test the patches to the charts (`rancher-monitoring` and `rancher-logging`).
+The patched charts are saved under `./output/patched-charts`.
+
+If you want to add more charts and patches, just place the patches under
+`pkg/config/templates/patch/$CHART/$VERSION` and add a script `scripts/hack/patch-$CHART`.
+The script should contain three functions: `pull_$CHART_chart`, `patch_$CHART_chart` and
+`test_$CHART_chart`, see the existing scripts for reference.

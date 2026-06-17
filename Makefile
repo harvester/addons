@@ -1,29 +1,67 @@
-TARGETS := $(shell ls --ignore=help --ignore='*.txt' scripts)
+ROOT := $(realpath $(dir $(realpath $(firstword $(MAKEFILE_LIST)))))
+DOCKER_BUILDKIT := 1
+export DOCKER_BUILDKIT
 
-SHA512SUM_Linux_aarch64 := 781951b31e5ff018a04e755c6da7163b31a81edda61f1bed4def8d0e24229865c58a3d26aa0cc4184058d91ebcae300ead2cad16d3c46ccb1098419e3e41a016
-SHA512SUM_Linux_x86_64 := d2ec27ecf9362e2fafd27d76d85a5c5b92b53aefe07cffa76bf9887db6bee07b1023cca8fc32a2c9bdd2ecfadaee71397066b41bd37c9ebbbbce09913f0884d4
-SHA512SUM_Darwin_arm64 := 8a356c89ad32af1698ae8615a6e303773a8ac58b114368454d59965ec2aa8282e780d1e228d37c301ce6f87596f68bfe7f204eb5f4c019c386a58dd94153ddcf
-SHA512SUM_Darwin_x86_64 := dbab05de04dda26793f4ae7875d0fba96ee54b0228e192fd40c0b2116ed345b5444047fc2e0c90cb481f28cbe0e0452bcecb268c8d074cd8615eb2f5463c30b6
-SHA512SUM_Windows_x86_64 := 807aee2f68b6da35cb0885558f5cbc9a6c8747a56c7a200f0e1fcac9e2fd0da570cbb39e48b3192bd1a71805f2ab38fd19d77faebba97a89e5d9a8b430ee429e
+ifdef CI
+	BOLD  :=
+	CYAN  :=
+	RESET :=
+else
+	BOLD  := \033[1m
+	CYAN  := \033[36m
+	RESET := \033[0m
+endif
+BANNER = @printf "$(BOLD)$(CYAN)[target: $@]$(RESET)\n"
 
-help:
-	@./scripts/help "$(MAKEFILE_LIST)" $(TARGETS)
+MK_HOST_ARCH := $(shell uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+export MK_HOST_ARCH
 
-.dapper:
-	@echo Downloading dapper
-	@curl -sSfL https://releases.rancher.com/dapper/v0.6.0/dapper-$$(uname -s)-$$(uname -m) > .dapper.tmp
-	@CHECKSUM=$$(shasum -a 512 .dapper.tmp | awk '{print $$1}'); \
-	if [ "$$CHECKSUM" != "$(SHA512SUM_$(shell uname -s)_$(shell uname -m))" ]; then \
-		echo "Checksum verification failed!"; \
-		exit 1; \
-	fi
-	@@chmod +x .dapper.tmp
-	@./.dapper.tmp -v
-	@mv .dapper.tmp .dapper
+MK_REPO             := github.com/harvester/addons
+MK_REPO_ID          := $(shell printf '%s' "$(ROOT)$(MK_SYSTEM_ID)" | sha256sum | cut -c1-8)
+MK_PROVIDER_VERSION := $(shell git describe --tags --always --dirty)
+MK_CODECOV_TOKEN    ?=
+MK_DOCKER_PROGRESS  ?= plain
 
-$(TARGETS): .dapper
-	./.dapper $@
+MK_CODECOV_SECRET_ARG  := --secret id=codecov_token_$(MK_REPO_ID),env=MK_CODECOV_TOKEN --no-cache-filter=test
+MK_GOLANGCI_LINT_IMAGE := golangci/golangci-lint:v2.8.0-alpine@sha256:1194f3bfcbaeeb92d8d159fdfbe2a79d18ec0a222d9d984b1438906bca416b51
 
-.DEFAULT_GOAL := default
+MK_HELM_VERSION=v3.20.0
+MK_HELM_SHA256_amd64=dbb4c8fc8e19d159d1a63dda8db655f9ffa4aac1b9a6b188b34a40957119b286
+MK_HELM_SHA256_arm64=bfb14953295d5324d47ab55f3dfba6da28d46c848978c8fbf412d4271bdc29f1
 
-.PHONY: $(TARGETS)
+DOCKER_BUILD := \
+	docker build \
+		--progress=$(MK_DOCKER_PROGRESS) \
+		--build-arg REPO=$(MK_REPO) \
+		--build-arg REPO_ID=$(MK_REPO_ID) \
+		--build-arg HOST_ARCH=$(MK_HOST_ARCH) \
+		--build-arg GOLANGCI_LINT_IMAGE=$(MK_GOLANGCI_LINT_IMAGE) \
+		--build-arg ARCH=$(MK_HOST_ARCH) \
+		--build-arg HELM_VERSION=${MK_HELM_VERSION} \
+		--build-arg HELM_SHA256_amd64=${MK_HELM_SHA256_amd64} \
+		--build-arg HELM_SHA256_arm64=${MK_HELM_SHA256_arm64} \
+		-f $(ROOT)/Dockerfile $(ROOT)
+
+.PHONY: default generate templates addons patch-charts clean
+.DEFAULT: default
+
+default: generate patch-charts
+generate: templates addons
+
+output:
+	@mkdir -p ./output
+
+templates: output
+	$(BANNER)
+	$(DOCKER_BUILD) --target $@-output --output type=local,dest=.
+
+addons: output
+	$(BANNER)
+	$(DOCKER_BUILD) --target $@-output --output type=local,dest=.
+
+patch-charts: output
+	$(BANNER)
+	$(DOCKER_BUILD) --target $@-output --output type=local,dest=.
+
+clean:
+	@rm -rf output
