@@ -1,6 +1,6 @@
 module github.com/harvester/addons
 
-go 1.21.9
+go 1.26.4
 
 require (
 	github.com/sirupsen/logrus v1.8.1
