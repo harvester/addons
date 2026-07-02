@@ -37,7 +37,7 @@ data:
     [INPUT]
         Name              tail
         Tag               rke2_kubelet
-        Path              /var/lib/rancher/rke2/agent/logs/kubelet.log
+        Path              {{ .Values.additionalLoggingSources.rke2.kubeletLog.path | default "/var/lib/rancher/rke2/agent/logs/kubelet.log" }}
 
     [INPUT]
         Name              tail
