@@ -1,0 +1,18 @@
+# ==========================================
+# Rancher Logging Images
+# Version:
+# ==========================================
+
+# Used by rancher-logging-crd chart
+
+# Used by rancher-logging chart
+
+# ==========================================
+# Rancher Monitoring Images
+# Version: 
+# ==========================================
+
+# Used by rancher-monitoring-crd chart
+rancher/kuberlr-kubectl:v7.1.1
+
+# Used by rancher-monitoring chart
