@@ -48,15 +48,13 @@ patch_rancher_monitoring_chart()
   ls -alth "$origfile"
 
   # fix SSA error: spec.endpoints[0].metricRelabelings: Invalid value: "null"
-  echo "patch prometheus-node-exporter servicemonitor yaml file"
-  echo "original metricRelabelings"
-  grep "metricRelabelings" -3 $origfile || echo "metricRelabelings is not found in $origfile"
-  local origfile="./rancher-monitoring/charts/prometheus-node-exporter/templates/servicemonitor.yaml"
-  local newfile="${pkg_monitoring_path}/${monitoring_version}/prometheus-node-exporter-servicemonitor.yaml"
-  echo "use patched file $newfile to replace original file $origfile"
-  cp -f "$newfile" "$origfile"
-  echo "new metricRelabelings"
-  grep "metricRelabelings" -3 $origfile || echo "metricRelabelings is not found in $origfile"
+  echo "patch metricRelabelings in servicemonitor yaml files"
+  local difffile="${pkg_monitoring_path}/${monitoring_version}/servicemonitor.patch"
+  if [ -f "$difffile" ]; then
+    patch -p1 -i $difffile
+  else
+    echo "diff file $difffile is not found"
+  fi
 
   # remove existing chart
   rm -f ${chart_dir}/rancher-monitoring-${monitoring_version}.tgz
