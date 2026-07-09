@@ -29,8 +29,11 @@ check_rancher_monitoring_logging_images_from_file() {
     # 2. Remove leading/trailing whitespace
     # 3. Skip empty lines and lines starting with '#'
     while IFS= read -r line || [[ -n "$line" ]]; do
-        # Clean the line
-        line=$(echo "$line" | sed -e 's/\r//g' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+        # 1. Strip the trailing carriage return (CRLF handling)
+        line=${line%$'\r'}
+
+        # 2. Strip leading and trailing whitespace using native read
+        read -r line <<< "$line"
 
         # Skip comments and empty lines
         [[ -z "$line" || "$line" =~ ^# ]] && continue

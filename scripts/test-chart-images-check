@@ -44,8 +44,8 @@ test_chart_images_check()
   # Strip comments and empty lines
   # -E enables extended regex
   # -v inverts the match (keeps lines that DO NOT match)
-  # ^\s*(#|$) matches lines starting with optional whitespace followed by # or the end of the line
-  grep -Ev '^\s*(#|$)' "$images_source" > "$images_target"
+  # matches lines starting with optional whitespace followed by # or the end of the line
+  grep -Ev '^[[:space:]]*(#|$)' "$images_source" > "$images_target"
 
   echo "Cleaned file generated successfully at: $images_target"
   echo "the simulated file content:"
@@ -55,8 +55,8 @@ test_chart_images_check()
 
   echo "SUCCESS: Validation passed as expected."
 
-
   echo -e "\n--- Case 2: Simulating failure by stripping the last line ---"
+
   # Remove the last line using head (keeps all but the last line)
   local corrupted_target="/tmp/rancher-images-corrupted.txt"
   head -n -1 "$images_target" > "$corrupted_target"
