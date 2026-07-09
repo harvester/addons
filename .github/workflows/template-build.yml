@@ -1,0 +1,15 @@
+on:
+  workflow_call:
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - name: Checkout code
+      # v7 actions/checkout@v7 is used to support the `fetch-depth` option, which is not supported in v3
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+    - name: Run ci
+      run: make ci
