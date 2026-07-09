@@ -42,9 +42,12 @@ DOCKER_BUILD := \
 		--build-arg MK_GOLANGCI_LINT_IMAGE=$(MK_GOLANGCI_LINT_IMAGE) \
 		-f $(ROOT)/Dockerfile $(ROOT)
 
-.PHONY: generate test-chart-patch
+.PHONY: generate test-chart-patch ci
 .DEFAULT_GOAL := default
 default: generate test-chart-patch
+
+# for Github workflow usage
+ci: generate test-chart-patch
 
 # ---- Directories ----
 $(ROOT)/bin:
