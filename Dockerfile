@@ -1,6 +1,6 @@
 # Provide a default value so the static linter is happy, it eliminates following warning:
 # InvalidDefaultArgInFrom: Default value for ARG ${MK_GOLANGCI_LINT_IMAGE} results in empty or invalid base image name (line 2)
-ARG MK_GOLANGCI_LINT_IMAGE=golangci/golangci-lint:latest
+ARG MK_GOLANGCI_LINT_IMAGE=golangci/golangci-lint:v2.8.0-alpine@sha256:1194f3bfcbaeeb92d8d159fdfbe2a79d18ec0a222d9d984b1438906bca416b51
 FROM ${MK_GOLANGCI_LINT_IMAGE} AS golangci-lint
 
 FROM registry.suse.com/bci/golang:1.25.0 AS buildenv
