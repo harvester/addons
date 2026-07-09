@@ -1,0 +1,42 @@
+on:
+  workflow_call:
+    inputs:
+      refs:
+        required: false
+        type: string
+      release-tag-name:
+        required: true
+        type: string
+      push:
+        required: true
+        type: boolean
+
+env:
+  repo: "rancher"
+
+
+jobs:
+  dapper-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+    - name: Checkout code without refs
+      if: ${{ inputs.refs == '' }}
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+    - name: Checkout code with refs
+      if: ${{ inputs.refs != '' }}
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      with:
+        ref: ${{ inputs.refs }}
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@06116385d9baf250c9f4dcb4858b16962ea869c3 # v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4
+
+    - name: Run dapper
+      run: make ci

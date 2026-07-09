@@ -46,6 +46,9 @@ DOCKER_BUILD := \
 .DEFAULT_GOAL := default
 default: generate test-chart-patch
 
+# for github workflow usage
+ci: generate test-chart-patch
+
 # ---- Directories ----
 $(ROOT)/bin:
 	@mkdir -p $@
