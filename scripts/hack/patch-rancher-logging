@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Note: this file and function are used by the ISO builder (in the Harvester repo) to patch the chart.
+# Do not delete this file or function, even if the function appears to do nothing, to avoid breaking the ISO builder.
+# Patch contents change from version to version, so keeping the file and function stable is important.
+
 patch_rancher_logging_chart()
 {
   local chart_dir=$1 #${CHARTS_DIR}

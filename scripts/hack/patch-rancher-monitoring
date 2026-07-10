@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Note: this file and function are used by the ISO builder (in the Harvester repo) to patch the chart.
+# Do not delete this file or function, even if the function appears to do nothing, to avoid breaking the ISO builder.
+# Patch contents change from version to version, so keeping the file and function stable is important.
+
 patch_rancher_monitoring_chart()
 {
   local chart_dir=$1 #${CHARTS_DIR}
@@ -17,6 +21,11 @@ patch_rancher_monitoring_chart()
 
   local origfile="./rancher-monitoring/charts/grafana/templates/nginx-config.yaml"
   local newfile="${pkg_monitoring_path}/${monitoring_version}/nginx-config.yaml"
+  if [ ! -f "$newfile" ]; then
+    echo "Error: new file $newfile is not found, can't patch rancher-monitoring chart" >&2
+    cd "$cwd"
+    return 1
+  fi
   echo "patch original file $origfile"
   if [ -f "$origfile" ]; then
     ls -alth "$origfile"
@@ -28,32 +37,37 @@ patch_rancher_monitoring_chart()
     echo "original file $origfile is not found"
   fi
 
-  # replace grafana values busybox image version; yq can also work, but it strips all blank lines; use patch instead
-  local valuesfile="./rancher-monitoring/charts/grafana/values.yaml"
-  local difffile="${pkg_monitoring_path}/${monitoring_version}/patch-grafana-values.diff"
-  echo "patch mirrored-library-busybox image version"
-  echo "the current values.yaml has following mirrored-library-busybox image version"
-  grep "mirrored-library-busybox" $valuesfile -2 || true
-  if [ -f "$difffile" ]; then
-    patch $valuesfile $difffile
-  else
-    echo "diff file $difffile is not found"
-  fi
-  echo "the patched values.yaml has following mirrored-library-busybox image version"
-  grep "mirrored-library-busybox" $valuesfile -2 || true
-
   # replace with new file
   cp -f "$newfile" "$origfile"
   echo "patched file"
   ls -alth "$origfile"
 
-  # fix SSA error: spec.endpoints[0].metricRelabelings: Invalid value: "null"
-  echo "patch metricRelabelings in servicemonitor yaml files"
-  local difffile="${pkg_monitoring_path}/${monitoring_version}/servicemonitor.patch"
-  if [ -f "$difffile" ]; then
-    patch -p1 -i $difffile
+  # patch values.yaml, it uses v7.1.0 for kubectl, but v7.1.1 is already used by rancher-monitoring-crd,
+  #   so we update it to v7.1.1 to avoid using two different versions of kubectl in the same ISO.
+  # kubectl:
+  #   repository: rancher/kuberlr-kubectl
+  #   tag: v7.1.0
+  #   pullPolicy: IfNotPresent
+  local valuesyaml="./rancher-monitoring/values.yaml"
+  if [[ ! -f "${valuesyaml}" ]]; then
+    echo "Error: ${valuesyaml} is not found in extracted rancher-monitoring chart." >&2
+    cd "$cwd"
+    return 1
+  fi
+  local FOUND_TAG="yes"
+  echo "--- Checking if values.yaml contains kuberlr-kubectl tag v7.1.0 ---"
+  grep -C 2 'tag: v7.1.0' "${valuesyaml}" || { echo "Warning:  exact \`tag: v7.1.0\` not found." && FOUND_TAG="no"; }
+  if [ "$FOUND_TAG" = "yes" ]; then
+    echo "--- Modifying values.yaml to replace kuberlr-kubectl image tag v7.1.0 with v7.1.1 ---"
+    sed -i -E 's/^([[:space:]]*tag: )v7\.1\.0$/\1v7.1.1/' "${valuesyaml}"
+    echo "--- Verifying that values.yaml has been modified correctly ---"
+    if ! grep -C 2 'tag: v7.1.1' "${valuesyaml}"; then
+      echo "Error: Modification verification failed." >&2
+      cd "$cwd"
+      return 1
+    fi
   else
-    echo "diff file $difffile is not found"
+    echo "Skip: did not find tag v7.1.0, no replace."
   fi
 
   # remove existing chart
