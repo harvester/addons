@@ -1,3 +1,19 @@
+# This file tracks the images used by rancher-monitoring and rancher-logging charts.
+# It serves two primary purposes:
+#
+# (1) Bumping Process Support:
+#     Acts as a reference when bumping Helm charts. By cross-checking the charts
+#     against this file, developers can easily identify if images were updated,
+#     removed, renamed, or added. This is especially helpful for contributors
+#     unfamiliar with these specific charts who need to safely bump them.
+#
+# (2) Validation:
+#     Cross-referenced against `harvester/harvester/scripts/images/rancher-images.txt`
+#     to guarantee all image updates are properly propagated there.
+#     Note: Like the target file, this is a plain text file, but it supports inline
+#     comments. All comments, blank lines, and whitespace are automatically
+#     stripped by the script during validation.
+
 # ==========================================
 # Images used by rancher-logging chart
 # Version: 109.0.0+up4.10.0-rancher.23
@@ -27,7 +43,7 @@ docker.io/rancher/mirrored-kube-logging-config-reloader:v0.0.6
 # Used by rancher-monitoring-crd chart
 
 # changed: true; old value: v6.0.0
-#  also patch rancher-monitoring to use this image instead of v7.1.0
+#  also patch rancher-monitoring to use v7.1.1 instead of v7.1.0
 docker.io/rancher/kuberlr-kubectl:v7.1.1
 
 # Used by rancher-monitoring chart
