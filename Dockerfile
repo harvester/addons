@@ -1,4 +1,4 @@
-# Provide a default value so the static linter is happy, it eliminates following warning:
+# Provide a default value so the static linter is happy; it eliminates the following warning:
 # InvalidDefaultArgInFrom: Default value for ARG ${MK_GOLANGCI_LINT_IMAGE} results in empty or invalid base image name (line 2)
 ARG MK_GOLANGCI_LINT_IMAGE=golangci/golangci-lint:v2.8.0-alpine@sha256:1194f3bfcbaeeb92d8d159fdfbe2a79d18ec0a222d9d984b1438906bca416b51
 FROM ${MK_GOLANGCI_LINT_IMAGE} AS golangci-lint
@@ -67,3 +67,7 @@ COPY --from=generate /go/src/${MK_REPO}/bin/ /bin/
 FROM scratch AS test-chart-patch-output
 ARG MK_REPO
 COPY --from=test-chart-patch /go/src/${MK_REPO}/bin/ /bin/
+
+# ---- test-chart-images-check ----
+FROM base AS test-chart-images-check
+RUN  scripts/test-chart-images-check

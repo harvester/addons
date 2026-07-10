@@ -1,0 +1,77 @@
+#!/bin/bash
+set -e
+
+date
+echo "Test chart images check function, DAPPER_SOURCE=${DAPPER_SOURCE}"
+
+if [[ -z ${DAPPER_SOURCE} ]]; then
+  echo "set the DAPPER_SOURCE env first"
+  exit 1
+fi
+
+test_chart_images_check()
+{
+  local addon_check_chart_images_file="${DAPPER_SOURCE}/scripts/hack/check-monitoring-logging-chart-images"
+  # keep the function var as used on Harvester side
+  MONITORING_LOGGING_ADDON_IMAGE_VALIDATION_FUNC="check_rancher_monitoring_logging_images_from_file"
+
+  if [[ ! -f "${addon_check_chart_images_file}" ]]; then
+    echo "ERROR: ${addon_check_chart_images_file} not found." >&2
+    exit 1
+  fi
+
+  # Source the check-monitoring-logging-chart-images script to access the function
+  source "${addon_check_chart_images_file}"
+
+  # Check if the function is defined
+  if ! declare -f "${MONITORING_LOGGING_ADDON_IMAGE_VALIDATION_FUNC}" > /dev/null; then
+    echo "ERROR: Function ${MONITORING_LOGGING_ADDON_IMAGE_VALIDATION_FUNC} not found in ${addon_check_chart_images_file}." >&2
+    exit 1
+  fi
+
+  local images_source="${DAPPER_SOURCE}/scripts/hack/monitoring-logging-chart-images-list.txt"
+  local images_target="/tmp/rancher-images.txt"
+
+  # Ensure source file exists
+  if [ ! -f "$images_source" ]; then
+    echo "Error: Source file '$images_source' not found." >&2
+    exit 1
+  fi
+
+  echo "--- Case 1: Running validation against full target file ---"
+
+  # Simulate the rancher-images.txt file on Harvester repo
+  # Strip comments and empty lines
+  # -E enables extended regex
+  # -v inverts the match (keeps lines that DO NOT match)
+  # matches lines starting with optional whitespace followed by # or the end of the line
+  grep -Ev '^[[:space:]]*(#|$)' "$images_source" > "$images_target"
+
+  echo "Cleaned file generated successfully at: $images_target"
+  echo "the simulated file content:"
+  cat "$images_target"
+  echo "run the ${MONITORING_LOGGING_ADDON_IMAGE_VALIDATION_FUNC} function to check the images in $images_source against $images_target"
+  ${MONITORING_LOGGING_ADDON_IMAGE_VALIDATION_FUNC} "$images_source" "$images_target"
+
+  echo "SUCCESS: Validation passed as expected."
+
+  echo -e "\n--- Case 2: Simulating failure by stripping the last line ---"
+
+  # Remove the last line using head (keeps all but the last line)
+  local corrupted_target="/tmp/rancher-images-corrupted.txt"
+  head -n -1 "$images_target" > "$corrupted_target"
+  echo "The corrupted simulated file content:"
+  cat "$corrupted_target"
+  echo "Running validation against corrupted target..."
+  # Because set -e is active, we wrap the function call in an if-statement.
+  # This prevents the script from crashing and lets us handle the exit code.
+  if ${MONITORING_LOGGING_ADDON_IMAGE_VALIDATION_FUNC} "$images_source" "$corrupted_target"; then
+      echo "ERROR: Validation unexpectedly PASSED on a corrupted file!" >&2
+      exit 1
+  else
+      local exit_code=$?
+      echo "SUCCESS: Validation FAILED as expected (Exit Code: ${exit_code})."
+  fi
+}
+
+test_chart_images_check

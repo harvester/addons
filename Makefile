@@ -42,12 +42,12 @@ DOCKER_BUILD := \
 		--build-arg MK_GOLANGCI_LINT_IMAGE=$(MK_GOLANGCI_LINT_IMAGE) \
 		-f $(ROOT)/Dockerfile $(ROOT)
 
-.PHONY: generate test-chart-patch ci
+.PHONY: generate test-chart-patch test-chart-images-check ci
 .DEFAULT_GOAL := default
-default: generate test-chart-patch
+default: generate test-chart-patch test-chart-images-check
 
 # for Github workflow usage
-ci: generate test-chart-patch
+ci: generate test-chart-patch test-chart-images-check
 
 # ---- Directories ----
 $(ROOT)/bin:
@@ -62,3 +62,9 @@ generate: $(ROOT)/bin
 test-chart-patch: $(ROOT)/bin
 	$(BANNER)
 	$(DOCKER_BUILD) --target test-chart-patch-output --output type=local,dest=.
+
+# ---- test chart images check ----
+test-chart-images-check:
+	$(BANNER)
+	$(DOCKER_BUILD) --target test-chart-images-check
+# no output
