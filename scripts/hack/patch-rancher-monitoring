@@ -70,6 +70,34 @@ patch_rancher_monitoring_chart()
     echo "Skip: did not find tag v7.1.0, no replace."
   fi
 
+  # patch charts/grafana/values.yaml, it uses busybox 1.31.1 but all others are using 1.37.0,
+  # image:
+  #   repository: rancher/mirrored-library-busybox
+  #   tag: "1.31.1"
+  #   sha: ""
+  #   pullPolicy: IfNotPresent
+  local valuesyaml="./rancher-monitoring/charts/grafana/values.yaml"
+  if [[ ! -f "${valuesyaml}" ]]; then
+    echo "Error: ${valuesyaml} is not found in extracted rancher-monitoring chart." >&2
+    cd "$cwd"
+    return 1
+  fi
+  local FOUND_TAG="yes"
+  echo "--- Checking if charts/grafana/values.yaml contains busybox tag 1.31.1 ---"
+  grep -C 2 'tag: "1.31.1"' "${valuesyaml}" || { echo "Warning: exact \`tag: \"1.31.1\"\` not found." && FOUND_TAG="no"; }
+  if [ "$FOUND_TAG" = "yes" ]; then
+    echo "--- Modifying charts/grafana/values.yaml to replace busybox image tag 1.31.1 with 1.37.0 ---"
+    sed -i -E 's/^([[:space:]]*tag: )"1\.31\.1"$/\1"1.37.0"/' "${valuesyaml}"
+    echo "--- Verifying that charts/grafana/values.yaml has been modified correctly ---"
+    if ! grep -C 2 'tag: "1.37.0"' "${valuesyaml}"; then
+      echo "Error: Modification verification failed." >&2
+      cd "$cwd"
+      return 1
+    fi
+  else
+    echo "Skip: did not find tag \"1.31.1\", no replace."
+  fi
+
   # remove existing chart
   rm -f ${chart_dir}/rancher-monitoring-${monitoring_version}.tgz
 
