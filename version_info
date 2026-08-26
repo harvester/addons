@@ -8,14 +8,8 @@ HARVESTER_SEEDER_IMAGE="rancher/harvester-seeder:v1.9.0-rc6"
 NVIDIA_DRIVER_RUNTIME_CHART_VERSION="1.9.0-rc6"
 RANCHER_LOGGING_CHART_VERSION="109.0.0+up4.10.0-rancher.23"
 RANCHER_MONITORING_CHART_VERSION="109.0.3+up80.9.1-rancher.14"
-<<<<<<< HEAD
 HARVESTER_EVENTROUTER_FULL_TAG="rancher/harvester-eventrouter:v1.9.0-rc6"
-KUBEOVN_OPERATOR_CHART_VERSION="1.16.2-dev.0"
-KUBEOVN_OPERATOR_IMAGE="rancher/harvester-kubeovn-operator:v1.16.2-dev.0"
-=======
-HARVESTER_EVENTROUTER_FULL_TAG="rancher/harvester-eventrouter:master-head"
 KUBEOVN_OPERATOR_CHART_VERSION="1.16.2-rc6"
 KUBEOVN_OPERATOR_IMAGE="rancher/harvester-kubeovn-operator:v1.16.2-rc6"
->>>>>>> 4f4dfe4 (chore: bump kubeovn version (#354))
 DESCHEDULER_CHART_VERSION="0.36.0"
 DESCHEDULER_IMAGE="registry.k8s.io/descheduler/descheduler:v0.36.0"
