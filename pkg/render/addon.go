@@ -18,7 +18,6 @@ const (
 	defaultFileName         = "rancherd-22-addons.yaml"
 	relativeVersionFilePath = "../../"
 	defaultVersionFile      = "version_info"
-	imageSuffix             = "IMAGE"
 )
 
 type AddonResources struct {
@@ -122,20 +121,14 @@ func generate_version_info_map(versionFilePath string) (map[string]string, error
 
 	result := make(map[string]string, len(lines))
 	for _, v := range lines {
-		fields := strings.Split(v, "=")
+		fields := strings.SplitN(v, "=", 2)
 		if len(fields) == 2 { // need check to ignore hash=bang directive in version info file
-			if strings.Contains(fields[0], imageSuffix) {
-				// in case of image names we only need tag info and not full image name
-				images := strings.Split(fields[1], ":")
-				result[fields[0]] = strings.Trim(images[1], "\"")
-
-			} else {
-				// in case of a helm chart there the string will not be of format image:tag
-				// but will only contain chart version
-				// for example NVIDIA_DRIVER_RUNTIME_CHART_VERSION="0.1.1"
-				result[fields[0]] = fields[1]
-			}
+			key := strings.TrimSpace(fields[0])
+			result[key] = strings.Trim(strings.TrimSpace(fields[1]), "\"")
 		}
+	}
+	if err := versionScanner.Err(); err != nil {
+		return nil, fmt.Errorf("error reading version file: %v", err)
 	}
 	return result, nil
 }

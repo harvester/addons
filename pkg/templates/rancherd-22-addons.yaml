@@ -15,7 +15,8 @@ resources:
       {{- end }}
       valuesContent: |
         image:
-          tag: << .VM_IMPORT_CONTROLLER_IMAGE >>
+          repository: << .VM_IMPORT_CONTROLLER_IMAGE_REPOSITORY >>
+          tag: << .VM_IMPORT_CONTROLLER_IMAGE_TAG >>
         fullnameOverride: harvester-vm-import-controller
   - apiVersion: harvesterhci.io/v1beta1
     kind: Addon
@@ -33,7 +34,8 @@ resources:
       {{- end }}
       valuesContent: |
         image:
-          tag: << .PCIDEVICES_CONTROLLER_IMAGE >>
+          repository: << .PCIDEVICES_CONTROLLER_IMAGE_REPOSITORY >>
+          tag: << .PCIDEVICES_CONTROLLER_IMAGE_TAG >>
         fullnameOverride: harvester-pcidevices-controller
   - apiVersion: harvesterhci.io/v1beta1
     kind: Addon
@@ -91,7 +93,7 @@ resources:
           controlNamespace: cattle-logging-system
           workloadOverrides:
             containers:
-            - image: << .HARVESTER_EVENTROUTER_FULL_TAG >>
+            - image: << .HARVESTER_EVENTROUTER_IMAGE_REPOSITORY >>:<< .HARVESTER_EVENTROUTER_IMAGE_TAG >>
               name: event-tailer
               resources:
                 limits:
@@ -215,7 +217,8 @@ resources:
       {{- end }}
       valuesContent: |
         image:
-          tag: << .HARVESTER_SEEDER_IMAGE >>
+          repository: << .HARVESTER_SEEDER_IMAGE_REPOSITORY >>
+          tag: << .HARVESTER_SEEDER_IMAGE_TAG >>
         fullnameOverride: harvester-seeder
   - apiVersion: harvesterhci.io/v1beta1
     kind: Addon
@@ -233,8 +236,8 @@ resources:
       {{- end }}
       valuesContent: |
         image:
-          tag: sle-micro-head
-          repo: rancher/harvester-nvidia-driver-toolkit
+          tag: << .NVIDIA_DRIVER_TOOLKIT_IMAGE_TAG >>
+          repository: << .NVIDIA_DRIVER_TOOLKIT_IMAGE_REPOSITORY >>
         driverLocation:  "HTTPENDPOINT/NVIDIA-Linux-x86_64-vgpu-kvm.run"
         fullnameOverride: nvidia-driver-runtime
   - apiVersion: harvesterhci.io/v1beta1
@@ -370,7 +373,7 @@ resources:
       valuesContent: |
         kind: Deployment
         image:
-          repository: registry.k8s.io/descheduler/descheduler
+          repository: << .DESCHEDULER_IMAGE_REPOSITORY >>
           pullPolicy: IfNotPresent
         deschedulingInterval: 5m
         replicas: 1
