@@ -34,4 +34,8 @@ func Test_Template(t *testing.T) {
 	defer os.RemoveAll(tmpPath)
 	err = Template(relativeTemplatePath, tmpPath, filepath.Join(relativeVersionFilePath, defaultVersionFile))
 	assert.NoError(err)
+
+	rendered, err := os.ReadFile(filepath.Join(tmpPath, defaultFileName))
+	assert.NoError(err)
+	assert.Regexp(`metricsUtilization:\s*metricsServer:\s*true`, string(rendered))
 }
