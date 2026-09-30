@@ -395,6 +395,8 @@ resources:
                         - "virt-launcher"
             - name: LowNodeUtilization
               args:
+                metricsUtilization:
+                  metricsServer: true
                 evictableNamespaces:
                   exclude:
                   - cattle-dashboards
