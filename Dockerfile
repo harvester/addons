@@ -3,7 +3,7 @@
 ARG MK_GOLANGCI_LINT_IMAGE=golangci/golangci-lint:v2.8.0-alpine@sha256:1194f3bfcbaeeb92d8d159fdfbe2a79d18ec0a222d9d984b1438906bca416b51
 FROM ${MK_GOLANGCI_LINT_IMAGE} AS golangci-lint
 
-FROM registry.suse.com/bci/golang:1.25.0 AS buildenv
+FROM registry.suse.com/bci/golang:1.26 AS buildenv
 
 ARG HELM_VERSION=v3.20.0
 ARG HELM_SHA256_Linux_amd64=dbb4c8fc8e19d159d1a63dda8db655f9ffa4aac1b9a6b188b34a40957119b286
